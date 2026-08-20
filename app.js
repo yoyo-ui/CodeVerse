@@ -207,7 +207,7 @@ async function submitOrder() {
     const fileInput = document.getElementById('cust-screenshot');
     const submitBtn = document.getElementById('btn-submit-order');
 
-    if (!name || !phone || !fileInput.files[0] || !phoneRegex.test(phone)) {
+    if (!name || !phone || !fileInput.files[0] || !phoneRegex.test(phone) || !isNaN(Number(name))) {
         return alert('يرجى كتابة الاسم، رقم الواتساب 11 رقم، وإرفاق صورة إيصال التحويل.');
     }
 
