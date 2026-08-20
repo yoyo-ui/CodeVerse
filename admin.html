@@ -1,234 +1,169 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CodeVerse | Admin Control Terminal</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="style.css">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&family=Space+Grotesk:wght@700;800;900&display=swap"
-        rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة تحكم العمليات | CodeVerse Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Cairo', sans-serif; background-color: #030712; color: #f3f4f6; }
+    .mono-font { font-family: 'Fira Code', monospace; }
+    .card-terminal { background-color: #0b0f19; border: 1px solid rgba(139, 92, 246, 0.2); }
+  </style>
 </head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-violet-500 selection:text-white">
 
-<body class="text-gray-100 min-h-screen flex flex-col justify-between selection:bg-fuchsia-500 selection:text-gray-950">
-
-    <!-- الهيدر -->
-    <header class="border-b border-violet-950/60 bg-gray-950/80 backdrop-blur-xl p-4 sticky top-0 z-40 shadow-2xl">
-        <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-3">
-
-            <div class="flex items-center gap-3.5">
-                <div
-                    class="w-10 h-10 rounded-2xl bg-gray-900 border border-violet-500/40 p-2 flex items-center justify-center shadow-lg shadow-violet-500/20">
-                    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
-                        <path d="M14 16L6 24L14 32" stroke="#A78BFA" stroke-width="4" stroke-linecap="round"
-                            stroke-linejoin="round" />
-                        <path d="M34 16L42 24L34 32" stroke="#A78BFA" stroke-width="4" stroke-linecap="round"
-                            stroke-linejoin="round" />
-                        <path d="M28 10L20 38" stroke="#22D3EE" stroke-width="3.5" stroke-linecap="round" />
-                        <circle cx="24" cy="24" r="3" fill="#E879F9" />
-                    </svg>
-                </div>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <span
-                            class="brand-font text-lg font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-300 to-cyan-200">
-                            CodeVerse
-                        </span>
-                        <span
-                            class="px-2 py-0.5 rounded-md bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[9px] mono-font font-black uppercase tracking-wider">
-                            Admin Core
-                        </span>
-                    </div>
-                    <p class="text-[10px] text-gray-400 font-bold -mt-0.5">لوحة التحكم وإدارة العمليات</p>
-                </div>
-            </div>
-
-            <!-- شريط الإجراءات السريعة -->
-            <div id="admin-actions-bar" class="hidden flex items-center gap-2">
-                <button onclick="syncLatestAIVerseOrders()"
-                    class="bg-gray-900/90 hover:bg-gray-800 border border-cyan-500/30 text-cyan-300 px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
-                    <span>AIVerse فحص سجل</span> 🔄
-                </button>
-                <button onclick="loadDashboardData()"
-                    class="bg-gray-900/90 hover:bg-gray-800 border border-violet-500/30 text-violet-300 px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
-                    <span>تحديث الطلبات</span> ⚡
-                </button>
-                <button onclick="adminLogout()"
-                    class="bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 px-3 py-1.5 rounded-xl text-xs font-bold transition">
-                    خروج
-                </button>
-            </div>
-
+  <!-- Header -->
+  <header class="border-b border-gray-800/80 bg-gray-950/60 backdrop-blur-lg sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 py-3.5 flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-violet-600 to-fuchsia-600 flex items-center justify-center font-black text-white shadow-lg shadow-violet-900/40 mono-font">
+          &lt;/&gt;
         </div>
-    </header>
-
-    <!-- المحتوى الرئيسي -->
-    <main class="max-w-7xl mx-auto p-4 flex-1 w-full my-4 space-y-6">
-
-        <!-- شاشة تسجيل الدخول -->
-        <section id="login-section" class="max-w-md mx-auto my-12">
-            <div class="card-terminal rounded-3xl p-8 space-y-5 shadow-2xl border border-violet-500/30">
-                <div class="text-center space-y-2">
-                    <div
-                        class="w-12 h-12 rounded-2xl bg-violet-500/10 border border-violet-500/30 text-violet-300 text-2xl flex items-center justify-center mx-auto mb-2">
-                        🔐</div>
-                    <h2 class="text-xl font-black text-gray-100">تسجيل الدخول للمسؤول</h2>
-                    <p class="text-xs text-gray-400">أدخل كلمة مرور الإدارة للوصول للطلبات والتحكم بالنظام</p>
-                </div>
-
-                <form onsubmit="event.preventDefault(); adminLogin();" class="space-y-4 pt-2">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-400 mb-1">كلمة المرور</label>
-                        <input type="password" id="admin-pass-input" placeholder="••••••••"
-                            class="w-full bg-gray-950 border border-gray-800 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-violet-500 transition mono-font placeholder-gray-600"
-                            required>
-                    </div>
-                    <button type="submit" id="btn-login"
-                        class="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 py-3.5 rounded-2xl font-black text-sm shadow-lg shadow-violet-950/40 transition">
-                        دخول للوحة التحكم 🚀
-                    </button>
-                </form>
-            </div>
-        </section>
-
-        <!-- لوحة الإدارة الرئيسية -->
-        <section id="dashboard-section" class="hidden space-y-6">
-
-            <!-- كروت الإحصائيات -->
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="card-terminal rounded-2xl p-4 border border-amber-500/20 space-y-1">
-                    <span class="text-[11px] font-bold text-amber-400">طلبات قيد المراجعة</span>
-                    <p id="stat-pending" class="mono-font text-2xl font-black text-gray-100">0</p>
-                </div>
-
-                <div class="card-terminal rounded-2xl p-4 border border-emerald-500/20 space-y-1">
-                    <span class="text-[11px] font-bold text-emerald-400">الطلبات المكتملة</span>
-                    <p id="stat-approved" class="mono-font text-2xl font-black text-gray-100">0</p>
-                </div>
-
-                <div class="card-terminal rounded-2xl p-4 border border-violet-500/20 space-y-1">
-                    <span class="text-[11px] font-bold text-violet-400">إجمالي العمليات</span>
-                    <p id="stat-total" class="mono-font text-2xl font-black text-gray-100">0</p>
-                </div>
-
-                <div class="card-terminal rounded-2xl p-4 border border-cyan-500/20 space-y-1">
-                    <span class="text-[11px] font-bold text-cyan-400">حالة النظام</span>
-                    <p id="stat-maintenance-status" class="text-sm font-bold text-emerald-400">يعمل بشكل طبيعي</p>
-                </div>
-            </div>
-
-            <!-- شريط الإعدادات -->
-            <div
-                class="card-terminal rounded-3xl p-5 border border-violet-950/60 flex flex-wrap items-center justify-between gap-4">
-                <div class="flex items-center gap-3">
-                    <span class="text-xs font-bold text-gray-400">رقم محفظة التحويل:</span>
-                    <div class="flex items-center gap-2">
-                        <input type="text" id="setting-wallet-input"
-                            class="bg-gray-950 border border-gray-800 rounded-xl px-3 py-1.5 text-xs mono-font text-cyan-300 focus:outline-none focus:border-cyan-500"
-                            placeholder="010XXXXXXXX">
-                        <button onclick="updateWalletSetting()"
-                            class="bg-gray-800 hover:bg-gray-700 px-3 py-1.5 rounded-xl text-xs font-bold text-gray-200 transition">
-                            حفظ
-                        </button>
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-3">
-                    <span class="text-xs font-bold text-gray-400">وضع الصيانة:</span>
-                    <button id="btn-toggle-maintenance" onclick="toggleMaintenanceSetting()"
-                        class="px-4 py-1.5 rounded-xl text-xs font-black transition">
-                        تبديل الحالة
-                    </button>
-                </div>
-            </div>
-
-            <!-- قسم التحكم بظهور المنتجات -->
-            <div class="card-terminal rounded-3xl p-6 border border-violet-950/60 space-y-4">
-                <div class="flex justify-between items-center border-b border-gray-800 pb-3">
-                    <div class="flex items-center gap-2">
-                        <span class="text-base">👁️</span>
-                        <h3 class="font-black text-sm text-gray-100">إدارة ظهور المنتجات في المتجر</h3>
-                    </div>
-                    <span class="text-xs text-gray-400">التحكم في إخفاء/إظهار الخدمات للعملاء</span>
-                </div>
-
-                <div id="admin-products-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    <p class="text-gray-500 text-xs col-span-full text-center py-4">جاري جلب قائمة المنتجات...</p>
-                </div>
-            </div>
-
-            <!-- جدول الطلبات -->
-            <div class="card-terminal rounded-3xl overflow-hidden shadow-2xl border border-violet-950/60">
-                <div class="terminal-header px-6 py-3.5 flex justify-between items-center">
-                    <div class="flex items-center gap-2">
-                        <span class="w-3 h-3 rounded-full bg-rose-500/80"></span>
-                        <span class="w-3 h-3 rounded-full bg-amber-500/80"></span>
-                        <span class="w-3 h-3 rounded-full bg-emerald-500/80"></span>
-                        <span class="mono-font text-xs text-gray-400 font-bold ml-2">orders_database.log</span>
-                    </div>
-                    <span id="orders-count-badge"
-                        class="mono-font text-xs bg-violet-500/10 text-violet-300 border border-violet-500/20 px-2.5 py-0.5 rounded-full">
-                        0 سجل
-                    </span>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full text-right text-xs">
-                        <thead class="bg-gray-950/90 text-gray-400 font-bold border-b border-gray-800">
-                            <tr>
-                                <th class="p-4">كود الطلب</th>
-                                <th class="p-4">العميل</th>
-                                <th class="p-4">المنتج</th>
-                                <th class="p-4">الإيصال</th>
-                                <th class="p-4">الحالة</th>
-                                <th class="p-4">الكود / الرابط المسلم</th>
-                                <th class="p-4 text-center">الإجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody id="orders-table-body" class="divide-y divide-gray-800/60">
-                            <tr>
-                                <td colspan="7" class="text-center py-10 text-gray-500 mono-font">جاري جلب السجلات...
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-        </section>
-
-    </main>
-
-    <!-- مودال معاينة الإيصال -->
-    <div id="image-modal"
-        class="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 hidden z-50">
-        <div class="card-terminal border border-gray-800 rounded-3xl max-w-lg w-full p-4 space-y-3">
-            <div class="flex justify-between items-center border-b border-gray-800 pb-2">
-                <h4 class="text-xs font-bold text-gray-300">معاينة إيصال التحويل</h4>
-                <button onclick="closeImageModal()"
-                    class="text-gray-400 hover:text-gray-200 text-lg leading-none">&times;</button>
-            </div>
-            <div class="flex justify-center bg-gray-950 rounded-2xl p-2 max-h-[70vh] overflow-hidden">
-                <img id="modal-preview-img" src="" class="object-contain max-h-[65vh] rounded-xl" alt="Receipt">
-            </div>
-            <div class="text-center">
-                <a id="modal-img-link" href="#" target="_blank" class="text-xs text-cyan-400 hover:underline">فتح الصورة
-                    بالحجم الكامل ↗</a>
-            </div>
+        <div>
+          <span class="font-black text-lg text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400">CodeVerse</span>
+          <span class="text-[10px] bg-rose-950 text-rose-400 px-2 py-0.5 rounded-full border border-rose-800/50 mr-2 mono-font">ADMIN CORE</span>
         </div>
+      </div>
+
+      <div id="admin-actions-bar" class="hidden flex items-center gap-2">
+        <button onclick="syncLatestAIVerseOrders()" class="bg-gray-900 hover:bg-gray-800 border border-gray-700 text-cyan-300 px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1">
+          <span>🔄 فحص سجل AIVerse</span>
+        </button>
+        <button onclick="loadDashboardData()" class="bg-violet-600 hover:bg-violet-500 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition">
+          تحديث الطلبات ⚡
+        </button>
+        <button onclick="adminLogout()" class="bg-rose-950 hover:bg-rose-900 border border-rose-800/50 text-rose-300 px-3 py-1.5 rounded-xl text-xs font-bold transition">
+          خروج
+        </button>
+      </div>
     </div>
+  </header>
 
-    <!-- الفوتر -->
-    <footer class="border-t border-violet-950/60 bg-gray-950/80 py-5 text-center text-xs text-gray-500">
-        <div class="flex items-center justify-center gap-1.5 brand-font font-bold">
-            <span>© 2026</span>
-            <span class="text-violet-400">CodeVerse Admin</span>
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full">
+
+    <!-- Login Section -->
+    <section id="login-section" class="max-w-md mx-auto card-terminal p-8 rounded-3xl space-y-4 my-12">
+      <h2 class="text-lg font-black text-gray-100 text-center">تسجيل الدخول للإدارة</h2>
+      <p class="text-xs text-gray-400 text-center">أدخل كلمة مرور المسؤول للمتابعة والتحكم بالمتجر:</p>
+      
+      <div class="space-y-3 pt-2">
+        <input type="password" id="admin-pass-input" placeholder="كلمة المرور..." class="w-full bg-gray-950 border border-gray-800 rounded-2xl px-4 py-2.5 text-xs text-gray-100 focus:border-violet-500 outline-none mono-font text-center">
+        <button id="btn-login" onclick="adminLogin()" class="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white py-2.5 rounded-2xl text-xs font-black transition">
+          دخول للوحة التحكم 🚀
+        </button>
+      </div>
+    </section>
+
+    <!-- Dashboard Section -->
+    <section id="dashboard-section" class="space-y-8 hidden">
+
+      <!-- Status & Settings Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="card-terminal p-5 rounded-3xl space-y-1">
+          <p class="text-xs text-gray-400">الطلبات المعلقة</p>
+          <p id="stat-pending" class="text-2xl font-black text-amber-400 mono-font">0</p>
         </div>
-    </footer>
+        <div class="card-terminal p-5 rounded-3xl space-y-1">
+          <p class="text-xs text-gray-400">الطلبات المكتملة</p>
+          <p id="stat-approved" class="text-2xl font-black text-emerald-400 mono-font">0</p>
+        </div>
+        <div class="card-terminal p-5 rounded-3xl space-y-1">
+          <p class="text-xs text-gray-400">إجمالي العمليات</p>
+          <p id="stat-total" class="text-2xl font-black text-cyan-400 mono-font">0</p>
+        </div>
+        <div class="card-terminal p-5 rounded-3xl space-y-2 flex flex-col justify-between">
+          <div>
+            <p class="text-xs text-gray-400">حالة المتجر</p>
+            <p id="stat-maintenance-status" class="text-sm font-bold text-emerald-400">المتجر يعمل طبيعي ✅</p>
+          </div>
+          <button id="btn-toggle-maintenance" onclick="toggleMaintenanceSetting()" class="px-4 py-1.5 rounded-xl text-xs font-black bg-rose-600/20 text-rose-300 border border-rose-500/30 hover:bg-rose-600/30 transition">
+            تفعيل وضع الصيانة 🔴
+          </button>
+        </div>
+      </div>
 
-    <script src="admin.js"></script>
+      <!-- Wallet Number Controller -->
+      <div class="card-terminal p-5 rounded-3xl flex flex-wrap items-center justify-between gap-4">
+        <div class="space-y-1">
+          <h3 class="text-xs font-bold text-gray-200">رقم المحفظة المعروض للعملاء</h3>
+          <p class="text-[11px] text-gray-400">يظهر تلقائياً في نافذة الشراء لجميع المنتجات</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="text" id="setting-wallet-input" class="bg-gray-950 border border-gray-800 rounded-xl px-3 py-1.5 text-xs text-cyan-300 mono-font text-center focus:border-violet-500 outline-none w-48">
+          <button onclick="updateWalletSetting()" class="bg-violet-600 hover:bg-violet-500 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition">
+            حفظ
+          </button>
+        </div>
+      </div>
+
+      <!-- Fast Product Visibility Section -->
+      <div class="card-terminal rounded-3xl p-6 space-y-4">
+        <div class="flex justify-between items-center border-b border-gray-800 pb-3">
+          <div class="flex items-center gap-2">
+            <span>👁️</span>
+            <h3 class="font-black text-sm text-gray-100">إدارة ظهور المنتجات بالمتجر (تبديل فوري)</h3>
+          </div>
+          <span class="text-xs text-gray-400">انقر للتبديل اللحظي</span>
+        </div>
+        <div id="admin-products-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <p class="text-gray-500 text-xs col-span-full text-center py-4">جاري التحميل...</p>
+        </div>
+      </div>
+
+      <!-- Orders Table -->
+      <div class="card-terminal rounded-3xl overflow-hidden space-y-4 p-6">
+        <div class="flex justify-between items-center border-b border-gray-800 pb-3">
+          <h3 class="font-black text-sm text-gray-100">سجل طلبات الشراء الواردة</h3>
+          <span id="orders-count-badge" class="text-xs mono-font bg-violet-950 text-violet-400 px-2 py-0.5 rounded-full border border-violet-800">0 سجل</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-right text-xs">
+            <thead>
+              <tr class="border-b border-gray-800 text-gray-400 font-bold bg-gray-950/50">
+                <th class="p-3">رقم الطلب</th>
+                <th class="p-3">العميل</th>
+                <th class="p-3">المنتج والكمية</th>
+                <th class="p-3">الإيصال</th>
+                <th class="p-3">الحالة</th>
+                <th class="p-3">الكود / السبب</th>
+                <th class="p-3 text-center">الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="orders-table-body" class="divide-y divide-gray-800/60">
+              <tr><td colspan="7" class="text-center py-8 text-gray-500">جاري تحميل الطلبات...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Image Receipt Preview Modal -->
+  <div id="image-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
+    <div class="card-terminal max-w-xl w-full p-4 rounded-3xl space-y-3">
+      <div class="flex justify-between items-center border-b border-gray-800 pb-2">
+        <h4 class="text-xs font-bold text-gray-200">معاينة إيصال التحويل</h4>
+        <button onclick="closeImageModal()" class="text-gray-400 hover:text-gray-200 text-xs font-bold">✕</button>
+      </div>
+      <div class="max-h-[75vh] overflow-auto flex justify-center bg-gray-950 p-2 rounded-2xl">
+        <img id="modal-preview-img" src="" alt="Receipt" class="max-w-full max-h-[70vh] object-contain rounded-xl">
+      </div>
+      <div class="text-center">
+        <a id="modal-img-link" href="#" target="_blank" class="text-xs text-cyan-400 hover:underline">فتح الصورة في نافذة جديدة ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <footer class="border-t border-gray-800/60 py-4 text-center text-xs text-gray-500 mono-font">
+    CodeVerse Admin &copy; 2026
+  </footer>
+
+  <script src="admin.js"></script>
 </body>
-
 </html>
