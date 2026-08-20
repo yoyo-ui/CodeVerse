@@ -79,37 +79,84 @@ function updateStats(orders) {
 }
 
 function renderAdminProducts(services, hiddenList) {
-    hiddenProductsList = hiddenList || [];
+    hiddenProductsList = Array.isArray(hiddenList) ? hiddenList : [];
     const container = document.getElementById("admin-products-list");
     if (!container) return;
 
     if (!services || services.length === 0) {
-        container.innerHTML = `<p class="text-gray-500 text-xs col-span-full text-center py-2">لا توجد خدمات مسجلة في AIVerse.</p>`;
+        container.innerHTML = `<p class="text-gray-500 text-xs col-span-full text-center py-2">لا توجد خدمات متاحة حالياً.</p>`;
         return;
     }
 
     container.innerHTML = services.map(p => {
         const id = String(p.service_id || p.id);
-        const title = p.name || p.title || p.service_name || "منتج رقمي";
+        const title = p.name || p.title || "منتج رقمي";
         const isHidden = hiddenProductsList.includes(id);
 
         return `
-      <div class="bg-gray-950 border ${isHidden ? 'border-rose-500/30' : 'border-gray-800'} p-3.5 rounded-2xl flex items-center justify-between gap-2">
-        <div>
-          <p class="font-bold text-xs ${isHidden ? 'text-gray-400 line-through' : 'text-gray-200'}">${title}</p>
-          <span class="mono-font text-[10px] text-gray-500">ID: ${id}</span>
+      <div class="bg-gray-950 border ${isHidden ? 'border-rose-500/20 bg-rose-950/5' : 'border-emerald-500/20 bg-emerald-950/5'} p-3.5 rounded-2xl flex items-center justify-between gap-3 transition">
+        <div class="space-y-0.5 overflow-hidden">
+          <p class="font-bold text-xs ${isHidden ? 'text-gray-400 line-through' : 'text-gray-100'} truncate">${title}</p>
+          <div class="flex items-center gap-2">
+            <span class="mono-font text-[10px] text-gray-500">${id}</span>
+            <span class="text-[10px] font-bold ${isHidden ? 'text-rose-400' : 'text-emerald-400'}">
+              ${isHidden ? '• غير معروض' : '• معروض للبيع'}
+            </span>
+          </div>
         </div>
-        <button onclick="toggleProduct('${id}')" class="px-3 py-1.5 rounded-xl text-[11px] font-bold transition ${isHidden
-                ? 'bg-rose-500/10 text-rose-300 border border-rose-500/30 hover:bg-rose-500/20'
-                : 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/20'
+
+        <button 
+          id="btn-toggle-${id}"
+          onclick="toggleProduct('${id}')" 
+          class="shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 ${isHidden
+                ? 'bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
             }">
-          ${isHidden ? 'مخفي 🚫' : 'ظاهر 👁️'}
+          <span>${isHidden ? 'إظهار 👁️' : 'إخفاء 🚫'}</span>
         </button>
       </div>
     `;
     }).join("");
 }
 
+async function toggleProduct(serviceId) {
+    const btn = document.getElementById(`btn-toggle-${serviceId}`);
+    if (btn) {
+        btn.disabled = true;
+        btn.classList.add("opacity-50");
+        btn.innerText = "جاري الحفظ...";
+    }
+
+    try {
+        const res = await fetch(APPS_SCRIPT_URL, {
+            method: "POST",
+            body: JSON.stringify({
+                action: "toggleProductVisibility",
+                pass: adminToken,
+                service_id: serviceId
+            })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            hiddenProductsList = data.hidden_products;
+            // إعادة تحميل الشاشة لتحديث الحالات فوراً
+            loadDashboardData();
+        } else {
+            alert("خطأ: " + (data.error || "تعذر التعديل"));
+            if (btn) {
+                btn.disabled = false;
+                btn.classList.remove("opacity-50");
+            }
+        }
+    } catch (err) {
+        alert("تعذر الاتصال بالسيرفر: " + err.message);
+        if (btn) {
+            btn.disabled = false;
+            btn.classList.remove("opacity-50");
+        }
+    }
+}
 async function toggleProduct(serviceId) {
     try {
         const res = await fetch(APPS_SCRIPT_URL, {
