@@ -1,5 +1,5 @@
-// Set your deployed Web App URL here
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzFKTrt7NLEBkhI4Ea2birS-BGpJRZuiplidJ0_PbkiE4R5S8VMbtGRsQfHpNh1jM5P/exec";
+// Replace with your current Google Apps Script Web App Deployment URL
+const APPS_SCRIPT_URL = "YOUR_DEPLOYED_GOOGLE_APPS_SCRIPT_URL";
 
 let adminToken = "";
 let currentOrders = [];
@@ -216,18 +216,29 @@ function renderOrders(orders) {
       statusBadge = `<span class="px-2.5 py-1 rounded-xl bg-rose-500/10 text-rose-300 border border-rose-500/20 font-bold">✕ مرفوض</span>`;
     }
 
-    const cleanPhone = String(o.whatsapp || "").replace(/\D/g, "");
+    // تنظيف وضبط رقم الهاتف المصري والحفاظ على الصفر في الواجهة
+    let rawDigits = String(o.whatsapp || "").replace(/\D/g, "");
+    if (rawDigits.startsWith("20")) {
+      rawDigits = rawDigits.substring(2);
+    }
+    if (!rawDigits.startsWith("0") && rawDigits.length > 0) {
+      rawDigits = "0" + rawDigits;
+    }
+
+    const displayPhone = rawDigits;
+    const waPhone = "2" + rawDigits;
+
     const trackingLink = `${storeUrl}?token=${o.tracking_token || ''}`;
     const whatsappMessage = encodeURIComponent(`أهلاً بك! يمكنك متابعة طلبك واستلام الكود عبر الرابط المباشر التالي:\n${trackingLink}`);
-    const sendLinkUrl = `https://wa.me/2${cleanPhone}?text=${whatsappMessage}`;
+    const sendLinkUrl = `https://wa.me/${waPhone}?text=${whatsappMessage}`;
 
     return `
       <tr class="hover:bg-violet-950/20 transition">
         <td class="p-4 mono-font font-bold text-gray-200">${o.order_id}</td>
         <td class="p-4">
           <p class="font-bold text-gray-100">${o.customer_name}</p>
-          <a href="https://wa.me/2${cleanPhone}" target="_blank" class="text-[11px] text-cyan-400 hover:underline mono-font flex items-center gap-1 mt-0.5">
-            <span>💬 ${o.whatsapp}</span>
+          <a href="https://wa.me/${waPhone}" target="_blank" class="text-[11px] text-cyan-400 hover:underline mono-font flex items-center gap-1 mt-0.5">
+            <span>💬 ${displayPhone}</span>
           </a>
         </td>
         <td class="p-4 font-bold text-gray-200">${o.service_name || o.service_id}</td>
