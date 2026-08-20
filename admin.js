@@ -1,5 +1,5 @@
 // Set your deployed Web App URL here
-const APPS_SCRIPT_URL = "YOUR_DEPLOYED_GOOGLE_APPS_SCRIPT_URL";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzFKTrt7NLEBkhI4Ea2birS-BGpJRZuiplidJ0_PbkiE4R5S8VMbtGRsQfHpNh1jM5P/exec";
 
 let adminToken = "";
 let currentOrders = [];
