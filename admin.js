@@ -216,7 +216,6 @@ function renderOrders(orders) {
       statusBadge = `<span class="px-2.5 py-1 rounded-xl bg-rose-500/10 text-rose-300 border border-rose-500/20 font-bold">✕ مرفوض</span>`;
     }
 
-    // تنظيف وضبط رقم الهاتف المصري والحفاظ على الصفر في الواجهة
     let rawDigits = String(o.whatsapp || "").replace(/\D/g, "");
     if (rawDigits.startsWith("20")) {
       rawDigits = rawDigits.substring(2);
@@ -227,6 +226,7 @@ function renderOrders(orders) {
 
     const displayPhone = rawDigits;
     const waPhone = "2" + rawDigits;
+    const quantity = parseInt(o.quantity, 10) || 1;
 
     const trackingLink = `${storeUrl}?token=${o.tracking_token || ''}`;
     const whatsappMessage = encodeURIComponent(`أهلاً بك! يمكنك متابعة طلبك واستلام الكود عبر الرابط المباشر التالي:\n${trackingLink}`);
@@ -241,14 +241,17 @@ function renderOrders(orders) {
             <span>💬 ${displayPhone}</span>
           </a>
         </td>
-        <td class="p-4 font-bold text-gray-200">${o.service_name || o.service_id}</td>
+        <td class="p-4">
+          <p class="font-bold text-gray-200">${o.service_name || o.service_id}</p>
+          <span class="mono-font text-[11px] text-cyan-400 bg-cyan-950/40 px-2 py-0.5 rounded border border-cyan-500/20 font-bold">الكمية: ${quantity}</span>
+        </td>
         <td class="p-4">
           ${o.screenshot_url && o.screenshot_url.startsWith('http') 
             ? `<button onclick="viewReceipt('${o.screenshot_url}')" class="bg-gray-900 hover:bg-gray-800 border border-gray-700 text-cyan-300 px-2.5 py-1 rounded-lg text-[11px] font-bold transition">عرض الإيصال 🖼️</button>` 
             : `<span class="text-gray-500 text-[11px]">لا يوجد</span>`}
         </td>
         <td class="p-4">${statusBadge}</td>
-        <td class="p-4 mono-font text-cyan-300 font-bold max-w-xs break-all select-all">${o.code_or_reason || "-"}</td>
+        <td class="p-4 mono-font text-cyan-300 font-bold max-w-xs break-all select-all leading-relaxed">${o.code_or_reason || "-"}</td>
         <td class="p-4 text-center">
           <div class="flex items-center justify-center gap-1.5 flex-wrap">
             <a href="${sendLinkUrl}" target="_blank" class="bg-cyan-600/20 hover:bg-cyan-600/30 border border-cyan-500/30 text-cyan-300 px-2.5 py-1.5 rounded-xl font-bold transition flex items-center gap-1 text-[11px]">
@@ -256,7 +259,7 @@ function renderOrders(orders) {
             </a>
             ${status === "pending" ? `
               <button onclick="approveOrder('${o.order_id}')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-xl font-bold transition shadow-sm text-xs">
-                موافقة وشراء
+                موافقة وشراء (${quantity})
               </button>
               <button onclick="rejectOrder('${o.order_id}')" class="bg-rose-600/20 hover:bg-rose-600/40 border border-rose-500/30 text-rose-300 px-2.5 py-1.5 rounded-xl font-bold transition text-xs">
                 رفض
@@ -272,7 +275,7 @@ function renderOrders(orders) {
 }
 
 async function approveOrder(orderId) {
-  if (!confirm(`هل أنت متأكد من الموافقة على الطلب ${orderId} وطلب الكود من المزود؟`)) return;
+  if (!confirm(`هل أنت متأكد من الموافقة على الطلب ${orderId} وطلب الأكواد بالكمية المطلوبة من المزود؟`)) return;
 
   try {
     const res = await fetch(APPS_SCRIPT_URL, {
@@ -282,7 +285,7 @@ async function approveOrder(orderId) {
     const data = await res.json();
 
     if (data.success) {
-      alert(`✅ تم إصدار الكود بنجاح:\n${data.code}`);
+      alert(`✅ تم إصدار الأكواد بنجاح:\n${data.code}`);
       loadDashboardData();
     } else {
       alert("❌ حدث خطأ: " + (data.error || "تعذر الشراء"));
