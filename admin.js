@@ -147,14 +147,12 @@ async function toggleProductFast(serviceId) {
   const wasHidden = hiddenProductsList.includes(serviceId);
   const nowHidden = !wasHidden;
 
-  // 1. Optimistic Local State Update
   if (nowHidden) {
     hiddenProductsList.push(serviceId);
   } else {
     hiddenProductsList = hiddenProductsList.filter(id => id !== serviceId);
   }
 
-  // 2. Instant Visual Transition
   if (card && title && status && btn) {
     card.className = `bg-gray-950 border ${nowHidden ? 'border-rose-500/20 bg-rose-950/5' : 'border-emerald-500/20 bg-emerald-950/5'} p-3.5 rounded-2xl flex items-center justify-between gap-3 transition-all duration-200`;
     title.className = `font-bold text-xs ${nowHidden ? 'text-gray-400 line-through' : 'text-gray-100'} truncate transition-colors duration-200`;
@@ -169,7 +167,6 @@ async function toggleProductFast(serviceId) {
     btn.innerHTML = `<span>${nowHidden ? 'إظهار 👁️' : 'إخفاء 🚫'}</span>`;
   }
 
-  // 3. Background Network Synchronization
   try {
     const res = await fetch(APPS_SCRIPT_URL, {
       method: "POST",
@@ -188,7 +185,6 @@ async function toggleProductFast(serviceId) {
     }
   } catch (err) {
     alert("تعذر حفظ التغيير على السيرفر: " + err.message);
-    // Rollback state upon failure
     if (wasHidden) {
       hiddenProductsList.push(serviceId);
     } else {
@@ -208,6 +204,8 @@ function renderOrders(orders) {
     return;
   }
 
+  const storeUrl = window.location.href.replace('admin.html', 'index.html').split('?')[0];
+
   tbody.innerHTML = orders.map(o => {
     const status = String(o.status || "pending").toLowerCase();
 
@@ -219,14 +217,16 @@ function renderOrders(orders) {
     }
 
     const cleanPhone = String(o.whatsapp || "").replace(/\D/g, "");
-    const waLink = `https://wa.me/2${cleanPhone}`;
+    const trackingLink = `${storeUrl}?token=${o.tracking_token || ''}`;
+    const whatsappMessage = encodeURIComponent(`أهلاً بك! يمكنك متابعة طلبك واستلام الكود عبر الرابط المباشر التالي:\n${trackingLink}`);
+    const sendLinkUrl = `https://wa.me/2${cleanPhone}?text=${whatsappMessage}`;
 
     return `
       <tr class="hover:bg-violet-950/20 transition">
         <td class="p-4 mono-font font-bold text-gray-200">${o.order_id}</td>
         <td class="p-4">
           <p class="font-bold text-gray-100">${o.customer_name}</p>
-          <a href="${waLink}" target="_blank" class="text-[11px] text-cyan-400 hover:underline mono-font flex items-center gap-1 mt-0.5">
+          <a href="https://wa.me/2${cleanPhone}" target="_blank" class="text-[11px] text-cyan-400 hover:underline mono-font flex items-center gap-1 mt-0.5">
             <span>💬 ${o.whatsapp}</span>
           </a>
         </td>
@@ -239,18 +239,21 @@ function renderOrders(orders) {
         <td class="p-4">${statusBadge}</td>
         <td class="p-4 mono-font text-cyan-300 font-bold max-w-xs break-all select-all">${o.code_or_reason || "-"}</td>
         <td class="p-4 text-center">
-          ${status === "pending" ? `
-            <div class="flex items-center justify-center gap-1.5">
-              <button onclick="approveOrder('${o.order_id}')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-xl font-bold transition shadow-sm">
+          <div class="flex items-center justify-center gap-1.5 flex-wrap">
+            <a href="${sendLinkUrl}" target="_blank" class="bg-cyan-600/20 hover:bg-cyan-600/30 border border-cyan-500/30 text-cyan-300 px-2.5 py-1.5 rounded-xl font-bold transition flex items-center gap-1 text-[11px]">
+              <span>إرسال الرابط</span> 📲
+            </a>
+            ${status === "pending" ? `
+              <button onclick="approveOrder('${o.order_id}')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-xl font-bold transition shadow-sm text-xs">
                 موافقة وشراء
               </button>
-              <button onclick="rejectOrder('${o.order_id}')" class="bg-rose-600/20 hover:bg-rose-600/40 border border-rose-500/30 text-rose-300 px-2.5 py-1.5 rounded-xl font-bold transition">
+              <button onclick="rejectOrder('${o.order_id}')" class="bg-rose-600/20 hover:bg-rose-600/40 border border-rose-500/30 text-rose-300 px-2.5 py-1.5 rounded-xl font-bold transition text-xs">
                 رفض
               </button>
-            </div>
-          ` : `
-            <span class="text-[11px] text-gray-500 mono-font">تمت المعالجة</span>
-          `}
+            ` : `
+              <span class="text-[11px] text-gray-500 mono-font">تمت المعالجة</span>
+            `}
+          </div>
         </td>
       </tr>
     `;
@@ -385,6 +388,7 @@ async function syncLatestAIVerseOrders() {
     alert("فشل المزامنة: " + err.message);
   }
 }
+
 // ==========================================
 // Modal & Initialization
 // ==========================================
