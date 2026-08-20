@@ -366,8 +366,18 @@ async function syncLatestAIVerseOrders() {
 
     if (ordersList.length > 0) {
       const latest = ordersList[0];
-      const code = (latest.products && latest.products.length > 0) ? latest.products.join(" | ") : (latest.code || latest.product || "لا يوجد كود");
-      alert(`📋 آخر عملية على AIVerse:\n• الخدمة: ${latest.service_name || latest.service_id}\n• الحالة: ${latest.status || "N/A"}\n• الكود المستلم: ${code}`);
+      const serviceTitle = latest.service || latest.service_name || latest.name || latest.service_id || "طلب غير محدد";
+      
+      let codeDelivered = "لا يوجد كود";
+      if (latest.delivered_products && Array.isArray(latest.delivered_products) && latest.delivered_products.length > 0) {
+        codeDelivered = latest.delivered_products.join(" | ");
+      } else if (latest.products && Array.isArray(latest.products) && latest.products.length > 0) {
+        codeDelivered = latest.products.join(" | ");
+      } else if (latest.code || latest.product) {
+        codeDelivered = latest.code || latest.product;
+      }
+
+      alert(`📋 آخر عملية على AIVerse:\n• الخدمة: ${serviceTitle}\n• الحالة: ${latest.status || "N/A"}\n• الكود المستلم: ${codeDelivered}`);
     } else {
       alert(data.error || "لا توجد طلبات في سجل AIVerse.");
     }
@@ -375,7 +385,6 @@ async function syncLatestAIVerseOrders() {
     alert("فشل المزامنة: " + err.message);
   }
 }
-
 // ==========================================
 // Modal & Initialization
 // ==========================================
