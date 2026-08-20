@@ -1,228 +1,149 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CodeVerse | Digital Keys & Subscriptions Hub</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="style.css">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&family=Space+Grotesk:wght@700;800;900&display=swap"
-        rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodeVerse | المتجر الرقمي السريع</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Cairo', sans-serif; background-color: #030712; color: #f3f4f6; }
+    .mono-font { font-family: 'Fira Code', monospace; }
+    .card-terminal { background-color: #0b0f19; border: 1px solid rgba(139, 92, 246, 0.2); }
+    .terminal-header { background-color: #111827; border-bottom: 1px solid rgba(75, 85, 99, 0.4); }
+  </style>
 </head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-violet-500 selection:text-white">
 
-<body class="text-gray-100 min-h-screen flex flex-col justify-between selection:bg-fuchsia-500 selection:text-gray-950">
+  <!-- Header -->
+  <header class="border-b border-gray-800/80 bg-gray-950/60 backdrop-blur-lg sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 py-3.5 flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-violet-600 to-fuchsia-600 flex items-center justify-center font-black text-white shadow-lg shadow-violet-900/40 mono-font">
+          &lt;/&gt;
+        </div>
+        <div>
+          <span class="font-black text-lg text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400">CodeVerse</span>
+          <span class="text-[10px] bg-violet-950 text-violet-400 px-2 py-0.5 rounded-full border border-violet-800/50 mr-2 mono-font">v2.0</span>
+        </div>
+      </div>
 
-    <!-- شريط الصيانة -->
-    <div id="maintenance-banner"
-        class="hidden bg-rose-950/90 border-b border-rose-500/30 text-rose-300 text-center py-2.5 px-4 font-bold text-xs shadow-xl flex items-center justify-center gap-2 sticky top-0 z-50 backdrop-blur-md">
-        <span class="animate-pulse text-base">⚠️</span>
-        <span id="maintenance-banner-text">المتجر في وضع الصيانة حالياً، إتمام عمليات الشراء متوقف مؤقتاً.</span>
+      <nav class="flex items-center gap-2 bg-gray-900/80 p-1 rounded-2xl border border-gray-800">
+        <button id="tab-btn-store" onclick="switchTab('store')" class="px-4 py-1.5 rounded-xl bg-violet-500/20 text-violet-300 border border-violet-500/30 text-xs font-bold transition flex items-center gap-1.5">
+          <span>المتجر 🛒</span>
+        </button>
+        <button id="tab-btn-orders" onclick="switchTab('orders')" class="px-4 py-1.5 rounded-xl text-gray-400 hover:text-gray-200 text-xs font-bold transition flex items-center gap-1.5">
+          <span>طلباتي 📦</span>
+        </button>
+      </nav>
     </div>
+  </header>
 
-    <!-- الهيدر -->
-    <header class="border-b border-violet-950/60 bg-gray-950/80 backdrop-blur-xl p-4 sticky top-0 z-40 shadow-2xl">
-        <div class="max-w-5xl mx-auto flex justify-between items-center">
+  <!-- Maintenance Banner -->
+  <div id="maintenance-banner" class="hidden bg-rose-950/80 border-b border-rose-800 text-rose-300 px-4 py-2 text-center text-xs font-bold">
+    <span id="maintenance-banner-text">المتجر في وضع الصيانة حالياً.</span>
+  </div>
 
-            <!-- شعار المتجر -->
-            <div class="flex items-center gap-3.5 cursor-pointer group" onclick="switchTab('store')">
-                <div
-                    class="w-11 h-11 rounded-2xl bg-gray-900 border border-violet-500/40 p-2 flex items-center justify-center shadow-lg shadow-violet-500/20 group-hover:border-fuchsia-400 group-hover:shadow-fuchsia-500/40 transition-all duration-300">
-                    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"
-                        class="w-full h-full transform group-hover:scale-105 transition duration-300">
-                        <defs>
-                            <linearGradient id="cvCosmic1" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stop-color="#A78BFA" />
-                                <stop offset="100%" stop-color="#C084FC" />
-                            </linearGradient>
-                            <linearGradient id="cvCosmic2" x1="0%" y1="100%" x2="100%" y2="0%">
-                                <stop offset="0%" stop-color="#22D3EE" />
-                                <stop offset="100%" stop-color="#E879F9" />
-                            </linearGradient>
-                        </defs>
-                        <path d="M14 16L6 24L14 32" stroke="url(#cvCosmic1)" stroke-width="4" stroke-linecap="round"
-                            stroke-linejoin="round" />
-                        <path d="M34 16L42 24L34 32" stroke="url(#cvCosmic1)" stroke-width="4" stroke-linecap="round"
-                            stroke-linejoin="round" />
-                        <path d="M28 10L20 38" stroke="url(#cvCosmic2)" stroke-width="3.5" stroke-linecap="round" />
-                        <circle cx="24" cy="24" r="3" fill="#22D3EE" />
-                    </svg>
-                </div>
+  <!-- Main Content -->
+  <main class="max-w-6xl mx-auto px-4 py-8 flex-grow w-full">
 
-                <div class="flex flex-col">
-                    <div class="flex items-center gap-1.5">
-                        <span
-                            class="brand-font text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-300 to-cyan-200">
-                            CodeVerse
-                        </span>
-                        <span
-                            class="px-1.5 py-0.5 rounded-md bg-violet-500/10 text-violet-300 border border-violet-500/20 text-[9px] mono-font font-bold">v2.0</span>
-                    </div>
-                    <span class="text-[10px] text-gray-400 font-bold tracking-wider uppercase -mt-0.5 opacity-80">
-                        Digital Keys & Subscriptions
-                    </span>
-                </div>
-            </div>
+    <!-- Store View -->
+    <section id="store-view" class="space-y-6">
+      <div class="text-center space-y-2 max-w-xl mx-auto">
+        <h2 class="text-2xl font-black text-white">الاشتراكات والمنتجات الرقمية</h2>
+        <p class="text-xs text-gray-400">اختر الخدمة، أتمم التحويل، واستلم بيانات التفعيل فوراً عبر لوحة التحكم الآلية.</p>
+      </div>
 
-            <!-- التبويبات -->
-            <nav class="flex items-center gap-2 p-1 bg-gray-900/90 rounded-2xl border border-violet-950/60">
-                <button onclick="switchTab('store')" id="tab-btn-store"
-                    class="px-4 py-1.5 rounded-xl bg-violet-500/20 text-violet-300 border border-violet-500/30 text-xs font-bold transition flex items-center gap-1.5">
-                    <span>المتجر</span>
-                </button>
-                <button onclick="switchTab('orders')" id="tab-btn-orders"
-                    class="px-4 py-1.5 rounded-xl text-gray-400 hover:text-gray-200 text-xs font-bold transition flex items-center gap-1.5">
-                    <span>طلباتي</span>
-                </button>
-            </nav>
+      <div id="products-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
+        <!-- Products render via app.js -->
+      </div>
+    </section>
 
+    <!-- Orders & Tracking View -->
+    <section id="orders-view" class="space-y-6 hidden">
+      <div class="max-w-xl mx-auto card-terminal p-6 rounded-3xl space-y-4">
+        <h2 class="text-base font-black text-gray-100 flex items-center gap-2">
+          <span>🔎</span> متابعة حالة الطلب
+        </h2>
+        <p class="text-xs text-gray-400">أدخل رمز التتبع الخاص بطلبك لعرض حالة المراجعة واستلام الأكواد:</p>
+        
+        <div class="flex gap-2">
+          <input type="text" id="order-search-input" placeholder="أدخل رمز التتبع هنا..." class="flex-grow bg-gray-950 border border-gray-800 rounded-2xl px-4 py-2 text-xs text-gray-100 focus:border-violet-500 outline-none mono-font text-left" dir="ltr">
+          <button id="btn-search-orders" onclick="searchOrders()" class="bg-violet-600 hover:bg-violet-500 text-white px-5 py-2 rounded-2xl text-xs font-bold transition">
+            بحث
+          </button>
         </div>
-    </header>
+      </div>
 
-    <!-- المحتوى الرئيسي -->
-    <main class="max-w-5xl mx-auto p-4 flex-1 w-full my-4">
+      <div id="orders-results" class="max-w-xl mx-auto">
+        <!-- Result card renders here -->
+      </div>
+    </section>
 
-        <!-- قسم المنتجات -->
-        <section id="store-view" class="space-y-6">
-            <div class="relative overflow-hidden rounded-3xl p-6 sm:p-8 card-terminal border border-violet-500/20">
-                <div
-                    class="absolute -right-16 -top-16 w-52 h-52 bg-violet-600/15 rounded-full blur-3xl pointer-events-none">
-                </div>
-                <div
-                    class="absolute -left-16 -bottom-16 w-52 h-52 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none">
-                </div>
+  </main>
 
-                <div class="relative flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-                    <div class="space-y-1.5">
-                        <span
-                            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-xs font-bold">
-                            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"></span>
-                            تسليم مباشر وفوري
-                        </span>
-                        <h2 class="text-2xl font-black text-gray-100 tracking-tight">المنتجات واشتراكات الذكاء الاصطناعي
-                        </h2>
-                        <p class="text-xs text-gray-400 max-w-xl leading-relaxed">احصل على مفاتيح وتفعيلات رقمية معتمدة
-                            بأفضل سعر مع ضمان استبدال وسرعة تسليم.</p>
-                    </div>
-                    <button onclick="loadProducts(true)"
-                        class="self-start sm:self-auto bg-gray-900/90 border border-violet-800/60 hover:border-fuchsia-500/50 px-4 py-2 rounded-2xl text-xs text-violet-300 font-bold transition flex items-center gap-2 shadow-sm">
-                        <span>تحديث المنتجات</span>
-                        <span class="text-sm">🔄</span>
-                    </button>
-                </div>
-            </div>
+  <!-- Checkout Modal -->
+  <div id="checkout-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
+    <div class="card-terminal w-full max-w-md p-6 rounded-3xl space-y-4 border border-violet-500/30">
+      <div class="flex justify-between items-center border-b border-gray-800 pb-3">
+        <h3 id="modal-product-name" class="font-black text-sm text-gray-100">إتمام الطلب</h3>
+        <button onclick="closeModal()" class="text-gray-400 hover:text-gray-200 text-sm font-bold">✕</button>
+      </div>
 
-            <div id="products-list" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
-        </section>
+      <div id="gemini-warning" class="hidden p-3 bg-amber-950/30 border border-amber-500/30 rounded-2xl text-[11px] text-amber-300">
+        ⚠️ ضمان الاستبدال سارٍ خلال أول 24 ساعة من الشراء.
+      </div>
 
-        <!-- قسم طلباتي الآمن -->
-        <section id="orders-view" class="space-y-6 hidden max-w-2xl mx-auto">
-            <div class="card-terminal rounded-3xl p-6 sm:p-8 space-y-4 shadow-2xl border border-violet-950/60">
-                <div class="text-center space-y-1">
-                    <div
-                        class="w-12 h-12 rounded-2xl bg-violet-500/10 border border-violet-500/20 text-violet-300 text-2xl flex items-center justify-center mx-auto mb-2">
-                        ⚡</div>
-                    <h2 class="text-xl font-extrabold text-gray-100">استلام ومتابعة الأكواد</h2>
-                    <p class="text-xs text-gray-400">أدخل رمز التتبع السري (Tracking Token) لجلب بيانات التفعيل فوراً
-                    </p>
-                </div>
-
-                <div class="flex flex-col sm:flex-row gap-2 pt-2">
-                    <input type="text" id="order-search-input" placeholder="رمز التتبع السري (xxxx-xxxx-xxxx)"
-                        class="flex-1 bg-gray-950 border border-gray-800 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-violet-500 transition placeholder-gray-600 mono-font">
-                    <button onclick="searchOrders()" id="btn-search-orders"
-                        class="bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 px-6 py-3 rounded-2xl text-sm font-bold shadow-lg shadow-violet-950/40 transition flex items-center justify-center gap-2">
-                        <span>بحث</span>
-                        <span>🔎</span>
-                    </button>
-                </div>
-            </div>
-
-            <div id="orders-results" class="space-y-4"></div>
-        </section>
-
-    </main>
-
-    <!-- نافذة الشراء (Checkout Modal) -->
-    <div id="checkout-modal"
-        class="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 hidden z-50">
-        <div
-            class="card-terminal border border-violet-900/60 rounded-3xl max-w-md w-full p-6 space-y-4 max-h-[92vh] overflow-y-auto shadow-2xl">
-            <div class="flex justify-between items-center border-b border-gray-800 pb-3">
-                <h3 class="text-base font-black text-gray-100" id="modal-product-name">إتمام الطلب</h3>
-                <button onclick="closeModal()"
-                    class="text-gray-400 hover:text-gray-200 text-lg leading-none">&times;</button>
-            </div>
-
-            <!-- تحذير الضمان لـ Gemini -->
-            <div id="gemini-warning"
-                class="hidden p-3.5 bg-amber-950/30 border border-amber-500/40 rounded-2xl flex items-start gap-2.5 text-amber-300 text-xs leading-relaxed">
-                <span class="text-base">⏳</span>
-                <div>
-                    <p class="font-bold text-amber-200 mb-0.5">تعليمات الضمان والتفعيل:</p>
-                    <p>الاشتراك يعمل لمدة <strong>18 شهراً</strong>. رابط التفعيل متاح لمدة <strong>4 إلى 6
-                            أيام</strong>، ويُفضّل تفعيله خلال <strong>أول 24 ساعة</strong> لضمان الاستبدال أو الاسترجاع
-                        في حال وجود أي مشكلة.</p>
-                </div>
-            </div>
-
-            <!-- رقم المحفظة -->
-            <div class="p-4 bg-gray-950 rounded-2xl border border-gray-800/80 space-y-1">
-                <span class="text-xs text-gray-400">حول إجمالي المبلغ إلى محفظة فودافون كاش:</span>
-                <div class="flex justify-between items-center pt-1">
-                    <p id="modal-wallet-display" class="text-cyan-400 mono-font font-black text-xl tracking-wider">
-                        010XXXXXXXX</p>
-                    <button
-                        onclick="navigator.clipboard.writeText(document.getElementById('modal-wallet-display').innerText); alert('تم نسخ الرقم!');"
-                        class="bg-gray-800 hover:bg-gray-700 text-gray-300 px-2.5 py-1 rounded-lg text-xs font-bold transition">
-                        نسخ الرقم 📋
-                    </button>
-                </div>
-            </div>
-
-            <!-- حقول الإدخال -->
-            <div class="space-y-3">
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 mb-1">الاسم الكامل</label>
-                    <input type="text" id="cust-name" placeholder="اكتب اسمك هنا"
-                        class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-sm focus:border-violet-500 focus:outline-none transition">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 mb-1">رقم الواتساب</label>
-                    <input type="text" id="cust-phone" placeholder="010XXXXXXXX"
-                        class="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-sm focus:border-violet-500 focus:outline-none transition mono-font">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 mb-1">صورة إيصال التحويل (Screenshot)</label>
-                    <input type="file" id="cust-screenshot" accept="image/*"
-                        class="w-full text-xs text-gray-400 file:mr-2 file:py-2.5 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-violet-600 file:text-white hover:file:bg-violet-500 cursor-pointer bg-gray-950 p-1.5 rounded-xl border border-gray-800">
-                </div>
-            </div>
-
-            <div class="flex gap-2 pt-2">
-                <button id="btn-submit-order" onclick="submitOrder()"
-                    class="flex-1 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 py-3.5 rounded-2xl font-black text-sm shadow-lg shadow-violet-950/40 transition">
-                    تأكيد وإرسال الإيصال
-                </button>
-                <button onclick="closeModal()"
-                    class="px-5 bg-gray-800 hover:bg-gray-700 py-3.5 rounded-2xl text-sm font-semibold transition">
-                    إلغاء
-                </button>
-            </div>
+      <div class="bg-gray-950 p-3.5 rounded-2xl border border-gray-800 text-xs space-y-1">
+        <p class="text-gray-400">حول المبلغ عبر فودافون كاش / إنستاباي إلى:</p>
+        <div class="flex justify-between items-center pt-1">
+          <span id="modal-wallet-display" class="mono-font text-cyan-300 font-bold text-sm select-all">010XXXXXXXX</span>
+          <button onclick="navigator.clipboard.writeText(document.getElementById('modal-wallet-display').innerText); alert('تم نسخ الرقم!');" class="text-[10px] bg-gray-800 hover:bg-gray-700 text-gray-300 px-2 py-1 rounded-lg">نسخ 📋</button>
         </div>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-gray-300 text-xs font-bold mb-1">الاسم الكامل</label>
+          <input type="text" id="cust-name" placeholder="مثال: أحمد محمد" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-gray-100 focus:border-violet-500 outline-none">
+        </div>
+
+        <div>
+          <label class="block text-gray-300 text-xs font-bold mb-1">رقم الواتساب (11 رقم مصري)</label>
+          <input type="tel" id="cust-phone" placeholder="01012345678" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-gray-100 focus:border-violet-500 outline-none mono-font text-left" dir="ltr">
+        </div>
+
+        <div>
+          <label class="block text-gray-300 text-xs font-bold mb-1">الكمية المطلوبة</label>
+          <div class="flex items-center gap-3">
+            <div class="flex items-center bg-gray-950 border border-gray-800 rounded-xl overflow-hidden">
+              <button onclick="adjustQuantity(-1)" class="px-3 py-1.5 bg-gray-900 hover:bg-gray-800 text-gray-300 font-black text-sm">-</button>
+              <input type="number" id="cust-quantity" value="1" min="1" max="10" onchange="validateAndUpdateTotal()" class="w-12 bg-transparent text-center text-xs text-cyan-300 font-bold mono-font outline-none">
+              <button onclick="adjustQuantity(1)" class="px-3 py-1.5 bg-gray-900 hover:bg-gray-800 text-gray-300 font-black text-sm">+</button>
+            </div>
+            <div class="text-xs text-gray-400">
+              الإجمالي المطلوب تحويله: <span id="modal-total-price" class="text-emerald-400 font-bold mono-font">0</span> ج.م
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-gray-300 text-xs font-bold mb-1">صورة إيصال التحويل (PNG, JPG, WEBP - بحد أقصى 3MB)</label>
+          <input type="file" id="cust-screenshot" accept="image/png, image/jpeg, image/webp" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-2 py-1.5 text-xs text-gray-400 file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-violet-600 file:text-white hover:file:bg-violet-500 cursor-pointer">
+        </div>
+      </div>
+
+      <button id="btn-submit-order" onclick="submitOrder()" class="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white py-2.5 rounded-2xl text-xs font-black transition">
+        تأكيد وإرسال الإيصال ⚡
+      </button>
     </div>
+  </div>
 
-    <!-- الفوتر -->
-    <footer class="border-t border-violet-950/60 bg-gray-950/80 py-6 text-center text-xs text-gray-500">
-        <div class="flex items-center justify-center gap-1.5 brand-font font-bold">
-            <span>© 2026</span>
-            <span class="text-violet-400">CodeVerse</span>
-            <span>— All Rights Reserved.</span>
-        </div>
-    </footer>
+  <!-- Footer -->
+  <footer class="border-t border-gray-800/60 py-4 text-center text-xs text-gray-500 mono-font">
+    CodeVerse &copy; 2026 | All Rights Reserved
+  </footer>
 
-    <script src="app.js"></script>
+  <script src="app.js"></script>
 </body>
-
 </html>
