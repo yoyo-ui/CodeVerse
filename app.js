@@ -203,11 +203,12 @@ function fileToBase64(file) {
 async function submitOrder() {
     const name = document.getElementById('cust-name').value.trim();
     const phone = document.getElementById('cust-phone').value.trim();
+    const phoneRegex = /^01\d{9}$/ ; 
     const fileInput = document.getElementById('cust-screenshot');
     const submitBtn = document.getElementById('btn-submit-order');
 
-    if (!name || !phone || !fileInput.files[0]) {
-        return alert('يرجى كتابة الاسم، رقم الواتساب، وإرفاق صورة إيصال التحويل.');
+    if (!name || !phone || !fileInput.files[0] || !phoneRegex.test(phone)) {
+        return alert('يرجى كتابة الاسم، رقم الواتساب 11 رقم، وإرفاق صورة إيصال التحويل.');
     }
 
     const file = fileInput.files[0];
