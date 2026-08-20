@@ -1,6 +1,5 @@
 // Replace with your current Google Apps Script Web App Deployment URL
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzFKTrt7NLEBkhI4Ea2birS-BGpJRZuiplidJ0_PbkiE4R5S8VMbtGRsQfHpNh1jM5P/exec";
-
 let adminToken = "";
 let currentOrders = [];
 let hiddenProductsList = [];
