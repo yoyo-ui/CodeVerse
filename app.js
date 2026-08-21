@@ -5,35 +5,6 @@ let selectedProduct = null;
 let currentWalletNumber = "010XXXXXXXX";
 let isMaintenanceActive = false;
 
-// ==========================================
-// Input Validation Utilities
-// ==========================================
-const Validator = {
-  isValidName(name) {
-    if (!name || typeof name !== 'string') return false;
-    const trimmed = name.trim();
-    return /^[\u0600-\u06FFa-zA-Z\s]{2,50}$/.test(trimmed);
-  },
-
-  sanitizePhone(phone) {
-    if (!phone) return "";
-    let clean = String(phone).replace(/\D/g, "");
-    if (clean.startsWith("20")) clean = clean.substring(2);
-    if (!clean.startsWith("0") && clean.length === 10) clean = "0" + clean;
-    return clean;
-  },
-
-  isValidEgyptianPhone(phone) {
-    const clean = this.sanitizePhone(phone);
-    return /^01[0125][0-9]{8}$/.test(clean);
-  },
-
-  isValidQuantity(qty) {
-    const num = parseInt(qty, 10);
-    return !isNaN(num) && num >= 1 && num <= 10;
-  }
-};
-
 function getSavedTokens() {
   try {
     return JSON.parse(localStorage.getItem("cv_tracking_tokens") || "[]");
@@ -97,8 +68,8 @@ function renderProducts(services) {
   container.innerHTML = services.map(p => {
     const title = p.name || p.title || p.service_name || "منتج رقمي";
     const id = p.service_id || p.id || "key";
-    const price = p.price !== undefined ? parseFloat(p.price) : 0;
-    const stock = p.stock !== undefined ? p.stock : "متوفر";
+    const price = p.price !== undefined ? p.price : (p.cost !== undefined ? p.cost : 0);
+    const stock = p.stock !== undefined ? p.stock : (p.quantity !== undefined ? p.quantity : "متوفر");
     const isGemini = title.toLowerCase().includes('gemini');
     const imgUrl = getServiceImage(title, p.image_url || p.image);
 
@@ -198,28 +169,6 @@ async function loadProducts(forceRefresh = false) {
   }
 }
 
-function adjustQuantity(delta) {
-  const input = document.getElementById('cust-quantity');
-  let current = parseInt(input.value, 10) || 1;
-  current += delta;
-  if (current < 1) current = 1;
-  if (current > 10) current = 10;
-  input.value = current;
-  validateAndUpdateTotal();
-}
-
-function validateAndUpdateTotal() {
-  const input = document.getElementById('cust-quantity');
-  let qty = parseInt(input.value, 10);
-  if (isNaN(qty) || qty < 1) qty = 1;
-  if (qty > 10) qty = 10;
-  input.value = qty;
-
-  const unitPrice = selectedProduct ? parseFloat(selectedProduct.price || 0) : 0;
-  const total = unitPrice * qty;
-  document.getElementById('modal-total-price').innerText = total;
-}
-
 function openCheckout(product) {
   if (isMaintenanceActive) {
     return alert("المتجر مغلق للصيانة حالياً ولا يمكن استقبال طلبات جديدة.");
@@ -227,8 +176,9 @@ function openCheckout(product) {
   selectedProduct = product;
   document.getElementById('modal-product-name').innerText = `إتمام طلب: ${product.name}`;
   document.getElementById('modal-wallet-display').innerText = currentWalletNumber;
-  document.getElementById('cust-quantity').value = "1";
-  validateAndUpdateTotal();
+  if (product.stock == 0){
+    return alert("Product is out of stock")
+  }
   
   const warningBox = document.getElementById('gemini-warning');
   if (product.name.toLowerCase().includes('gemini')) {
@@ -254,41 +204,18 @@ function fileToBase64(file) {
 }
 
 async function submitOrder() {
-  const nameInput = document.getElementById('cust-name');
-  const phoneInput = document.getElementById('cust-phone');
-  const qtyInput = document.getElementById('cust-quantity');
+  const name = document.getElementById('cust-name').value.trim();
+  const phone = document.getElementById('cust-phone').value.trim();
   const fileInput = document.getElementById('cust-screenshot');
   const submitBtn = document.getElementById('btn-submit-order');
 
-  const name = nameInput.value.trim();
-  const rawPhone = phoneInput.value.trim();
-  const quantity = parseInt(qtyInput.value, 10) || 1;
-
-  if (!Validator.isValidName(name)) {
-    return alert("يرجى إدخال اسم صحيح باللغة العربية أو الإنجليزية (من حرفين إلى 50 حرفاً دون رموز غريبة).");
-  }
-
-  if (!Validator.isValidEgyptianPhone(rawPhone)) {
-    return alert("يرجى إدخال رقم هاتف مصري صحيح مكون من 11 رقماً (مثال: 01012345678).");
-  }
-  const cleanPhone = Validator.sanitizePhone(rawPhone);
-
-  if (!Validator.isValidQuantity(quantity)) {
-    return alert("الكمية غير صالحة. يمكنك طلب من قطعة واحدة حتى 10 قطع كحد أقصى.");
-  }
-
-  if (!fileInput.files || !fileInput.files[0]) {
-    return alert("يرجى إرفاق صورة إيصال التحويل المالي.");
+  if (!name || !phone || !fileInput.files[0]) {
+    return alert('يرجى كتابة الاسم، رقم الواتساب، وإرفاق صورة إيصال التحويل.');
   }
 
   const file = fileInput.files[0];
-  const validImageTypes = ["image/jpeg", "image/png", "image/webp"];
-  if (!validImageTypes.includes(file.type)) {
-    return alert("صيغة الملف غير مدعومة. يرجى رفع صورة بصيغة JPG أو PNG أو WEBP.");
-  }
-
   if (file.size > 3 * 1024 * 1024) {
-    return alert("حجم الصورة كبير جداً! الحد الأقصى المسموح به هو 3 ميجابايت.");
+    return alert('حجم الصورة كبير جداً! الحد الأقصى المسموح به هو 3 ميجابايت.');
   }
 
   submitBtn.disabled = true;
@@ -300,13 +227,10 @@ async function submitOrder() {
     const payload = {
       action: "createOrder",
       customer_name: name,
-      whatsapp: cleanPhone,
-      quantity: quantity,
+      whatsapp: phone,
       screenshot_base64: base64Image,
       service_id: selectedProduct.service_id,
-      service_name: selectedProduct.name,
-      unit_price: selectedProduct.price,
-      total_price: selectedProduct.price * quantity
+      service_name: selectedProduct.name
     };
 
     const res = await fetch(APPS_SCRIPT_URL, {
@@ -319,7 +243,7 @@ async function submitOrder() {
       saveToken(data.tracking_token);
       
       const directTrackingUrl = `${window.location.origin}${window.location.pathname}?token=${data.tracking_token}`;
-      alert(`✅ تم إرسال طلبك بنجاح!\nرقم الطلب: ${data.order_id}\nالكمية: ${quantity}\n\nرابط متابعة طلبك واستلام الأكواد:\n${directTrackingUrl}`);
+      alert(`✅ تم إرسال طلبك بنجاح!\nرقم الطلب: ${data.order_id}\n\nرابط متابعة طلبك واستلام الكود:\n${directTrackingUrl}`);
       
       closeModal();
       switchTab('orders');
@@ -366,7 +290,7 @@ async function fetchAndRenderOrder(trackingToken) {
         <div class="card-terminal ${cardBorder} p-6 rounded-3xl space-y-4 shadow-2xl transition mb-4">
           <div class="flex justify-between items-start flex-wrap gap-2 border-b border-gray-800 pb-3">
             <div>
-              <p class="font-extrabold text-base text-gray-100">${o.service_name} <span class="mono-font text-cyan-400 text-xs">(الكمية: ${o.quantity || 1})</span></p>
+              <p class="font-extrabold text-base text-gray-100">${o.service_name}</p>
               <p class="text-xs text-gray-400 mt-1">كود الطلب: <span class="mono-font text-cyan-300 font-bold">${o.order_id}</span></p>
             </div>
             <div>${statusBadge}</div>
@@ -375,12 +299,12 @@ async function fetchAndRenderOrder(trackingToken) {
           ${status === 'approved' ? `
             <div class="bg-gray-950 border border-emerald-500/20 rounded-2xl p-4 space-y-2">
               <div class="flex justify-between items-center">
-                <span class="text-xs text-emerald-400 font-bold">الأكواد الخاصة بك:</span>
-                <button onclick="navigator.clipboard.writeText('${o.code_or_reason}'); alert('تم نسخ الأكواد بنجاح!');" class="bg-emerald-600 hover:bg-emerald-500 px-3 py-1 rounded-lg text-xs font-bold transition shadow">
-                  نسخ 📋
+                <span class="text-xs text-emerald-400 font-bold">الكود الخاص بك:</span>
+                <button onclick="navigator.clipboard.writeText('${o.code_or_reason}'); alert('تم نسخ الكود بنجاح!');" class="bg-emerald-600 hover:bg-emerald-500 px-3 py-1 rounded-lg text-xs font-bold transition shadow">
+                  نسخ الكود 📋
                 </button>
               </div>
-              <p class="mono-font font-bold text-sm text-emerald-300 break-all select-all bg-gray-900 p-3 rounded-xl border border-gray-800 text-center leading-relaxed">${o.code_or_reason}</p>
+              <p class="mono-font font-bold text-sm text-emerald-300 break-all select-all bg-gray-900 p-3 rounded-xl border border-gray-800 text-center">${o.code_or_reason}</p>
             </div>
             ${isGemini ? `
               <div class="p-3.5 bg-amber-950/40 border border-amber-500/40 rounded-2xl text-xs text-amber-300 leading-relaxed space-y-1">
