@@ -324,7 +324,7 @@ async function fetchAndRenderOrder(trackingToken) {
                   <span>⏳</span>
                   <span>معلومات هامة بخصوص التفعيل والضمان:</span>
                 </p>
-                <p>• <strong>مدة الاشتراك:</strong> يعمل معك لمدة <strong>18 شهراً</strong> كاملة.</p>
+                <p>• <strong>مدة الاشتراك:</strong> يعمل معك لمدة قد تصل إلى <strong>18 شهراً</strong></p>
                 <p>• <strong>صلاحية الرابط:</strong> رابط التفعيل صالح للاستخدام لمدة <strong>من 4 إلى 6 أيام</strong>.</p>
                 <p>• <strong>الضمان:</strong> يُفضّل تفعيل الرابط خلال <strong>أول 24 ساعة</strong> لضمان الاستبدال أو الاسترجاع في حال واجهتك أي مشكلة.</p>
               </div>
