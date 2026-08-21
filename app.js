@@ -1,5 +1,6 @@
 // ضع رابط الـ Web App الخاص بك هنا
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzFKTrt7NLEBkhI4Ea2birS-BGpJRZuiplidJ0_PbkiE4R5S8VMbtGRsQfHpNh1jM5P/exec";
+// Replace with your current Google Apps Script Web App Deployment URL
 
 let selectedProduct = null;
 let currentWalletNumber = "010XXXXXXXX";
@@ -26,11 +27,11 @@ function switchTab(tab) {
   document.getElementById('store-view').classList.toggle('hidden', !isStore);
   document.getElementById('orders-view').classList.toggle('hidden', isStore);
 
-  document.getElementById('tab-btn-store').className = isStore 
+  document.getElementById('tab-btn-store').className = isStore
     ? "px-4 py-1.5 rounded-xl bg-violet-500/20 text-violet-300 border border-violet-500/30 text-xs font-bold transition flex items-center gap-1.5"
     : "px-4 py-1.5 rounded-xl text-gray-400 hover:text-gray-200 text-xs font-bold transition flex items-center gap-1.5";
 
-  document.getElementById('tab-btn-orders').className = !isStore 
+  document.getElementById('tab-btn-orders').className = !isStore
     ? "px-4 py-1.5 rounded-xl bg-violet-500/20 text-violet-300 border border-violet-500/30 text-xs font-bold transition flex items-center gap-1.5"
     : "px-4 py-1.5 rounded-xl text-gray-400 hover:text-gray-200 text-xs font-bold transition flex items-center gap-1.5";
 
@@ -127,7 +128,7 @@ async function loadProducts(forceRefresh = false) {
     const res = await fetch(`${APPS_SCRIPT_URL}?action=getProducts&_t=${Date.now()}`);
     const resText = await res.text();
     let data;
-    
+
     try {
       data = JSON.parse(resText);
     } catch (e) {
@@ -176,10 +177,10 @@ function openCheckout(product) {
   selectedProduct = product;
   document.getElementById('modal-product-name').innerText = `إتمام طلب: ${product.name}`;
   document.getElementById('modal-wallet-display').innerText = currentWalletNumber;
-  if (product.stock == 0){
+  if (product.stock == 0) {
     return alert("Product is out of stock")
   }
-  
+
   const warningBox = document.getElementById('gemini-warning');
   if (product.name.toLowerCase().includes('gemini')) {
     warningBox.classList.remove('hidden');
@@ -241,10 +242,10 @@ async function submitOrder() {
 
     if (data.success) {
       saveToken(data.tracking_token);
-      
+
       const directTrackingUrl = `${window.location.origin}${window.location.pathname}?token=${data.tracking_token}`;
       alert(`✅ تم إرسال طلبك بنجاح!\nرقم الطلب: ${data.order_id}\n\nرابط متابعة طلبك واستلام الكود:\n${directTrackingUrl}`);
-      
+
       closeModal();
       switchTab('orders');
       document.getElementById('order-search-input').value = data.tracking_token;
@@ -262,7 +263,7 @@ async function submitOrder() {
 
 async function fetchAndRenderOrder(trackingToken) {
   const container = document.getElementById('orders-results');
-  
+
   try {
     const res = await fetch(APPS_SCRIPT_URL, {
       method: "POST",
@@ -297,15 +298,26 @@ async function fetchAndRenderOrder(trackingToken) {
           </div>
 
           ${status === 'approved' ? `
-            <div class="bg-gray-950 border border-emerald-500/20 rounded-2xl p-4 space-y-2">
-              <div class="flex justify-between items-center">
-                <span class="text-xs text-emerald-400 font-bold">الكود الخاص بك:</span>
-                <button onclick="navigator.clipboard.writeText('${o.code_or_reason}'); alert('تم نسخ الكود بنجاح!');" class="bg-emerald-600 hover:bg-emerald-500 px-3 py-1 rounded-lg text-xs font-bold transition shadow">
-                  نسخ الكود 📋
+            <div class="bg-gray-950 border border-emerald-500/20 rounded-2xl p-4 space-y-3">
+              <div class="flex justify-between items-center border-b border-gray-800 pb-2">
+                <span class="text-xs text-emerald-400 font-bold">الأكواد المستلمة:</span>
+                <button onclick="navigator.clipboard.writeText(\`${o.code_or_reason}\`); alert('تم نسخ جميع الأكواد!');" class="bg-emerald-600 hover:bg-emerald-500 px-3 py-1 rounded-lg text-xs font-bold transition shadow">
+                  نسخ الكل 📋
                 </button>
               </div>
-              <p class="mono-font font-bold text-sm text-emerald-300 break-all select-all bg-gray-900 p-3 rounded-xl border border-gray-800 text-center">${o.code_or_reason}</p>
+
+              <div class="space-y-2">
+                ${String(o.code_or_reason).split('\n').map((codeItem, idx) => `
+                  <div class="flex items-center justify-between bg-gray-900 border border-gray-800 p-2.5 rounded-xl gap-2">
+                    <span class="mono-font text-xs text-emerald-300 select-all break-all font-bold">${codeItem}</span>
+                    <button onclick="navigator.clipboard.writeText('${codeItem.trim()}'); alert('تم نسخ الكود!');" class="shrink-0 text-[11px] bg-gray-800 hover:bg-gray-700 text-gray-300 px-2 py-1 rounded-lg border border-gray-700">
+                      نسخ
+                    </button>
+                  </div>
+                `).join('')}
+              </div>
             </div>
+
             ${isGemini ? `
               <div class="p-3.5 bg-amber-950/40 border border-amber-500/40 rounded-2xl text-xs text-amber-300 leading-relaxed space-y-1">
                 <p class="font-bold flex items-center gap-1.5 text-amber-200">
@@ -366,7 +378,7 @@ function autoLoadRecentOrders() {
 function checkUrlForTrackingToken() {
   const urlParams = new URLSearchParams(window.location.search);
   const token = urlParams.get('token');
-  
+
   if (token) {
     switchTab('orders');
     document.getElementById('order-search-input').value = token;
